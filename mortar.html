@@ -20,9 +20,9 @@
         floor.bottom();
         floor.setSize(1000, 35);
         // GITHUB GLITCH: floor doesn't stay on bottom; use this
-        setTimeout(function(){
+        setInterval(function(){
           floor.bottom();
-        }, 100);
+        }, 200);
                 
         var mortar = new sjs.Image("Images/mortar.png");
         mortar.setSize(80, 100);
