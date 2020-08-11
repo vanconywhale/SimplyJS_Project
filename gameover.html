@@ -10,6 +10,10 @@
         var floor = new sjs.Image("Images/floor.png");
         floor.bottom();
         floor.setSize(1000, 35);
+        // GITHUB GLITCH: floor doesn't stay on bottom; use this
+        setTimeout(function(){
+          floor.bottom();
+        }, 1);
         
         // lose text
         var lose = new sjs.Text("Game Over!", 50, "#003300");
