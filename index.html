@@ -15,10 +15,10 @@
         var floor = new sjs.Image("Images/floor.png");
         floor.bottom();
         floor.setSize(1000, 35);
-        // GITHUB GLITCH: floor doesn't stay on bottom; use interval
+        // GITHUB GLITCH: floor doesn't stay on bottom; use this
         setTimeout(function(){
           floor.bottom();
-        }, 10);
+        }, 1);
         
         // title
         var title = new sjs.Text("MORTAR", 50, "#003300");
