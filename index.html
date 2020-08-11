@@ -14,12 +14,11 @@
         // floor
         var floor = new sjs.Image("Images/floor.png");
         floor.bottom();
-        floor.bottom();
         floor.setSize(1000, 35);
         // GITHUB GLITCH: floor doesn't stay on bottom; use interval
-        /*setInterval(function(){
+        setTimeout(function(){
           floor.bottom();
-        }, 5);*/
+        }, 10);
         
         // title
         var title = new sjs.Text("MORTAR", 50, "#003300");
