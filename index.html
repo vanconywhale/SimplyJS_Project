@@ -13,8 +13,9 @@
         
         // floor
         var floor = new sjs.Image("Images/floor.png");
-        floor.bottom();
-        floor.node.style.bottom = 0;
+        setTimeout(function(){
+          floor.bottom();
+          }, 1000);
         floor.setSize(1000, 35);
         
         // title
