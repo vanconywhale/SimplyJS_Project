@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <title></title>
+    <script src="https://simplycodingcourses.com/files/simply.js"></script>
+    <script>
+      function start(){
+        sjs.open("target",1000,600);
+        
+        // floor
+        var floor = new sjs.Image("Images/floor.png");
+        floor.bottom();
+        floor.setSize(1000, 35);
+        
+        // lose text
+        var lose = new sjs.Text("Game Over!", 50, "#003300");
+        lose.center().offset(0, -150);
+        
+        // restart button
+        var restartBtn = new sjs.Button("Try Again", function(){
+          window.location = "index.html";
+        });
+        restartBtn.center();
+        
+        // score
+        var score = new sjs.Text("Score: " + localStorage.getItem("score"), 24, "blue");
+        score.offset(30, 30);
+        
+        // reset data values
+        localStorage.setItem("score", 0);
+        localStorage.setItem("targetIncrement", 0);
+        
+      } //end start
+    </script>
+  </head>
+  <body onload="start()">
+
+    <div id="target" style="margin:auto;background:lightblue;"></div>
+  </body>
+</html>

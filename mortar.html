@@ -1,0 +1,215 @@
+<html>
+  <head>
+    <title></title>
+    <script src="https://simplycodingcourses.com/files/simply.js"></script>
+    <script>
+      function start(){
+        sjs.open("target",1000,600);
+        
+        // data
+        var score = parseInt(localStorage.getItem("score"));
+        var targetCount = 1 + parseInt(localStorage.getItem("targetIncrement"));
+        var ballCount = targetCount + parseInt(localStorage.getItem("extraLife"));
+        
+        // music
+        var pop = new Audio("Music/pop.mp3");
+        var explosion = new Audio("Music/explosion.mp3");
+        
+        // create static objects
+        var floor = new sjs.Image("Images/floor.png");
+        floor.bottom();
+        floor.setSize(1000, 35);
+                
+        var mortar = new sjs.Image("Images/mortar.png");
+        mortar.setSize(80, 100);
+        mortar.moveTo(40, 500);
+        
+        var blockade = new sjs.Image("Images/blockade.png");
+        blockade.setSize(200, 250);
+        blockade.moveTo(160, 500);
+        
+        var sun = new sjs.Image("Images/sun.png");
+        sun.setSize(150, 150);
+        sun.noBounds = true;
+        sun.moveTo(850, 0);
+        
+        // clouds!
+        var cloud1 = new sjs.Image("Images/cloud1.png");
+        cloud1.setSize(200, 150);
+        cloud1.moveTo(Math.random() * 1000, Math.random() * 200);
+        var cloud2 = new sjs.Image("Images/cloud2.png");
+        cloud2.setSize(200, 150);
+        cloud2.moveTo(Math.random() * 1000, Math.random() * 200);
+        var cloud3 = new sjs.Image("Images/cloud3.png");
+        cloud3.setSize(200, 150);
+        cloud3.moveTo(Math.random() * 1000, Math.random() * 200);
+        
+        // generate targets
+        for (var i = 0; i < targetCount; i++) {
+          var target = new sjs.Image("Images/target.png");
+          target.type = "target";
+          if (parseInt(localStorage.getItem("extraLife")) == 0) {
+            // hard mode after round 4
+            target.setSize(Math.round(Math.random() * 60) + 40, Math.round(Math.random() * 20) + 10);
+          } else {
+            target.setSize(120, 30);
+          }
+          target.moveTo(Math.round(Math.random() * 490 + 380), 567); // modify x-location randomly
+          sjs.onHit("target", "target", function(x, y){
+            if (parseInt(localStorage.getItem("extraLife")) == 0) {
+              target.setSize(Math.round(Math.random() * 60) + 40, Math.round(Math.random() * 20) + 10);
+            } else {
+              target.setSize(Math.round(Math.random() * 60) + 60, Math.round(Math.random() * 10) + 20);
+            }
+            x.moveTo(Math.round(Math.random() * 490 + 380), 567);
+          });
+          
+          // TARGET X-DISTANCE: 380 - 870 (925 for ball)
+        }
+        
+        // description icons
+        var power_txt = new sjs.Text("Distance Power", 24, "black");
+        power_txt.moveTo(25, 15);
+        
+        var help_txt = new sjs.Text("(hold spacebar)");
+        help_txt.moveTo(40, 100);
+        
+        var power = new sjs.Image("Images/power.png");
+        power.moveTo(20, 50);
+        power.setSize(0, 45);
+        
+        var power_bar = new sjs.Image("Images/power_bar.png");
+        power_bar.moveTo(20, 50);
+        power_bar.setSize(190, 45);
+        
+        var ball_txt = new sjs.Text("Balls Left: " + ballCount, 24, "blue");
+        ball_txt.moveTo(30, 150);
+        
+        var score_txt = new sjs.Text("Score: " + score, 24, "blue");
+        score_txt.moveTo(30, 185);
+        
+        // MORTAR FIRING PROCESS
+        
+        var xScale;
+        var spaceDownToggle = true;
+        var spaceUpToggle = true;
+        var powerScale;
+
+        sjs.keyDown(SPACE_KEY, function(){
+          if (spaceDownToggle) {
+            spaceDownToggle = false;
+            var goingUp = true;
+            xScale = 0;
+            
+            // interval for moving power bar up and down
+            powerScale = setInterval(function(){
+              if (goingUp) {
+                xScale++;
+                power.setSize(xScale, 45);
+              } else {
+                xScale--;
+                power.setSize(xScale, 45);
+              }
+              if (xScale == 190) {
+                goingUp = false;
+              }
+              if (xScale == 0) {
+                goingUp = true;
+              }
+            }, 5);
+          }
+        });
+        
+        // stops power bar animation once space bar is let go
+        window.addEventListener("keyup", function(e){
+          if (e.keyCode == SPACE_KEY) {
+            if (spaceUpToggle) {
+              clearInterval(powerScale);
+              spaceUpToggle = false;
+              
+              // calculate where the ball will land
+              var xDistance = xScale * 2.87 + 380;
+
+              // create a cannonball and send it
+              var ball = new sjs.Image("Images/ball.png");
+              ball.type = "ball";
+              ball.setSize(50, 50);
+              ball.moveTo(55, 460);
+              ball.noBounds = true;
+              ball.friction = 0;
+              ball.pushUp(100);
+              pop.play();
+              setTimeout(function(){
+                ball.stop();
+                ball.moveTo(xDistance, -50);
+                ball.pushDown(100);
+              }, 1000);
+              
+              // check if it misses target
+              setTimeout(function(){
+                if (ball.y > 800) {
+                  ball.destroy();
+                }
+                
+                // decrement ballCount
+                ballCount--;
+                ball_txt.setText("Balls Left: " + ballCount);
+                
+                // check for next level, restart, or no balls left
+                if (targetCount == 0) {
+                  // go to next level
+                  var targetIncrement = parseInt(localStorage.getItem("targetIncrement"));
+                  if (targetIncrement < 4) {
+                    targetIncrement++;
+                  }
+                  if (targetIncrement == 4) {
+                    localStorage.setItem("extraLife", 0);
+                  }
+                  localStorage.setItem("targetIncrement", targetIncrement);
+                  var next_txt = new sjs.Text("Loading Next Level...", 28, "black");
+                  next_txt.center().offset(25, -100);
+                  setTimeout(function(){
+                    window.location = "mortar.html";
+                  }, 750);
+                } else if (ballCount > 0) {
+                  // ready next ball
+                  power.setSize(0, 45);
+                  spaceDownToggle = true;
+                  spaceUpToggle = true;
+                } else {
+                  // game over
+                  var lose_txt = new sjs.Text("Oh no!...", 28, "black");
+                  lose_txt.center().offset(25, -100);
+                  setTimeout(function(){
+                    window.location = "gameover.html";
+                  }, 750);
+                }
+              }, 2000)
+            }
+          
+          }
+        });
+        
+        // collision check between ball and target
+        sjs.onHit("ball", "target", function(x, y){
+          x.stop();
+          y.destroy();
+          explosion.play();
+          targetCount--;
+          x.setImage("Images/explosion.gif");
+          setTimeout(function(){
+            x.destroy();
+          }, 775);
+          score++;
+          localStorage.setItem("score", score);
+          score_txt.setText("Score: " + score);
+        });
+        
+      } //end start
+    </script>
+  </head>
+  <body onload="start()">
+
+    <div id="target" style="margin:auto;background:lightblue;"></div>
+  </body>
+</html>
